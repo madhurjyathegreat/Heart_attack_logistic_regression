@@ -1,0 +1,222 @@
+import numpy as np
+import pandas as pd
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn import linear_model
+import math
+from matplotlib import pyplot as plt
+from sklearn.preprocessing import StandardScaler
+
+
+X, y = make_classification(n_samples=50000, n_features=15, n_informative=10, n_redundant=5,
+                           n_classes=2, weights=[0.7], class_sep=0.7, random_state=15)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=15)
+scaler=StandardScaler()
+scaler.fit_transform(X_train)
+#scaler.fit_transform(X_test)
+
+def initialize_weights(dim):
+    ''' In this function, we will initialize our weights and bias'''
+    #initialize the weights to zeros array of (dim,1) dimensions
+    #you use zeros_like function to initialize zero, check this link https://docs.scipy.org/doc/numpy/reference/generated/numpy.zeros_like.html
+    #initialize bias to zero
+    
+    w=dim.reshape(len(dim))
+    
+    w=np.zeros_like(w)
+    b=0
+    
+    
+
+    return w,b
+
+dim=X_train[0]
+w,b = initialize_weights(dim)
+print('w =',(w))
+print('b =',str(b))
+
+dim=X_train[0] 
+w,b = initialize_weights(dim)
+def grader_weights(w,b):
+  assert((len(w)==len(dim)) and b==0 and np.sum(w)==0.0)
+  return True
+grader_weights(w,b)
+
+
+def sigmoid(z):
+  sigmoid_result=1/(1+np.exp(-z))
+  return sigmoid_result
+
+def grader_sigmoid(z):
+  val=sigmoid(z)
+  assert(val==0.8807970779778823)
+  return True
+grader_sigmoid(2)
+
+
+
+def logloss(y_true,y_pred):
+    #eps=10**-8
+    #summation=0
+    sum=0
+    for i in range(len(y_true)):
+       sum+=(y_true[i]*np.log10(y_pred[i]))+ ((1-y_true[i])*np.log10(1-y_pred[i]))
+    loss=-sum/len(y_true)
+    
+    return loss
+
+
+
+
+def gradient_dw(x,y,w,b,alpha,N):
+  dw=((y-sigmoid(np.dot(w.T,x)+b))*x) -((1/N)*alpha*w.T)
+  return dw
+
+
+
+def grader_dw(x,y,w,b,alpha,N):
+  grad_dw=gradient_dw(x,y,w,b,alpha,N)
+  assert(np.sum(grad_dw)==2.613689585)
+  return True
+grad_x=np.array([-2.07864835,  3.31604252, -0.79104357, -3.87045546, -1.14783286,
+       -2.81434437, -0.86771071, -0.04073287,  0.84827878,  1.99451725,
+        3.67152472,  0.01451875,  2.01062888,  0.07373904, -5.54586092])
+grad_y=0
+grad_w,grad_b=initialize_weights(grad_x)
+alpha=0.0001
+N=len(X_train)
+grader_dw(grad_x,grad_y,grad_w,grad_b,alpha,N)
+
+
+def gradient_db(x,y,w,b):
+  db=y-sigmoid(np.dot(w.T,x)+b)
+  return db
+
+def grader_db(x,y,w,b):
+  grad_db=gradient_db(x,y,w,b)
+  assert(grad_db==-0.5)
+  return True
+grad_x=np.array([-2.07864835,  3.31604252, -0.79104357, -3.87045546, -1.14783286,
+       -2.81434437, -0.86771071, -0.04073287,  0.84827878,  1.99451725,
+        3.67152472,  0.01451875,  2.01062888,  0.07373904, -5.54586092])
+grad_y=0
+grad_w,grad_b=initialize_weights(grad_x)
+alpha=0.0001
+N=len(X_train)
+grader_db(grad_x,grad_y,grad_w,grad_b)
+
+
+
+
+def train(X_train,y_train,X_test,y_test,epochs,alpha,eta0):
+    ''' In this function, we will implement logistic regression'''
+    #Here eta0 is learning rate
+    #implement the code as follows
+    # initalize the weights (call the initialize_weights(X_train[0]) function)
+    # for every epoch
+        # for every data point(X_train,y_train)
+           #compute gradient w.r.to w (call the gradient_dw() function)
+           #compute gradient w.r.to b (call the gradient_db() function)
+           #update w, b
+        # predict the output of x_train[for all data points in X_train] using w,b
+        #compute the loss between predicted and actual values (call the loss function)
+        # store all the train loss values in a list
+        # predict the output of x_test[for all data points in X_test] using w,b
+        #compute the loss between predicted and actual values (call the loss function)
+        # store all the test loss values in a list
+        # you can also compare previous loss and current loss, if loss is not updating then stop the process and return w,b
+    w,b=initialize_weights(X_train[0])
+    
+    loss_train1=[]
+    loss_test1=[]
+    
+    for each_epoch in range(epochs):
+        
+        for x,y in zip(X_train,y_train):
+      
+          grad_w=gradient_dw(x,y,w,b,alpha,N)
+          grad_b=(gradient_db(x,y,w,b))
+          w=w+(eta0*grad_w)
+         
+          b=b+(eta0*grad_b)
+        
+        predict=[]  
+          #print(z)
+        for i in range(len(X_train)):
+            z=np.dot(w,X_train[i])+b
+            #print(z)
+            p=sigmoid(z)
+            predict.append(p)
+
+          
+        loss_train=logloss(y_train,predict)
+        print(loss_train)
+        #print(w)
+        #print(b)
+        
+        
+        predict_test=[]  
+          #print(z)
+        for i in range(len(X_test)):
+            z1=np.dot(w,X_test[i])+b
+            #print(z)
+            p1=sigmoid(z1)
+            predict_test.append(p1)
+            
+        print("""""""""""")
+
+          
+        loss_test=logloss(y_test,predict_test)
+        print(loss_test)
+      
+        
+        
+        
+          
+
+          
+          
+        #l=logloss(y_train,p)
+        #print(l)
+        #loss_train.append(l)
+        #print(p)
+      
+        loss_train1.append(loss_train)
+        loss_test1.append(loss_test)
+        
+        
+        
+          
+             
+
+          
+          
+        
+    return w,b,loss_train1,loss_test1
+    
+    
+    
+
+
+alpha=0.0001
+eta0=0.0001
+N=len(X_train)
+epochs=50
+w,b,loss_train,loss_test=train(X_train,y_train,X_test,y_test,epochs,alpha,eta0)
+
+print(loss_train)
+print(loss_test)
+
+epochs_list=np.arange(50)
+plt.plot(loss_train,epochs_list)
+plt.plot(loss_test,epochs_list)
+plt.show()
+
+
+
+
+
+
+
+    
